@@ -1,0 +1,14 @@
+// config.js.example
+// Renomeie este arquivo para config.js e preencha com suas credenciais.
+
+// Suas credenciais do Genesys Cloud OAuth (Client Credentials)
+const clientId = 'SEU_CLIENT_ID_AQUI';
+const clientSecret = 'SEU_CLIENT_SECRET_AQUI';
+
+// Não é necessário alterar esta parte
+const platformClient = require('purecloud-platform-client-v2');
+module.exports = {
+  platformClient,
+  clientId,
+  clientSecret
+};

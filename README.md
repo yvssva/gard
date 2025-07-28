@@ -29,8 +29,8 @@ Antes de começar, garanta que você tenha os seguintes softwares instalados:
 
 1.  **Clone o repositório:**
     ```bash
-    git clone [https://github.com/SEU_USUARIO/SEU_REPOSITORIO.git](https://github.com/SEU_USUARIO/SEU_REPOSITORIO.git)
-    cd SEU_REPOSITORIO
+    git clone [https://github.com/yvssva/gard.git](https://github.com/yvssva/gard.git)
+    cd gard
     ```
 
 2.  **Instale as dependências do Node.js:**

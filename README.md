@@ -1,77 +1,65 @@
 # GARD - Genesys Automated Recording Downloader
 
-Um script de automação para baixar e converter gravações de chamadas do Genesys Cloud em lote. A ferramenta permite selecionar um intervalo de datas, uma fila específica e o formato de áudio final (OGG, WAV ou MP3).
+Um script de automação robusto para baixar e organizar gravações de chamadas do Genesys Cloud em massa. A ferramenta suporta downloads baseados em filas ou listas personalizadas de IDs, com suporte automático a grandes volumes e organização estruturada.
 
-## Funcionalidades
+## 🚀 Novas Funcionalidades
 
--   **Autenticação Segura:** Utiliza credenciais OAuth (Client Credentials).
--   **Seleção de Região:** Suporte para diferentes regiões do Genesys Cloud.
--   **Filtros Avançados:** Baixe gravações por fila e intervalo de datas.
--   **Conversão de Formato:** Opção para converter os arquivos `.ogg` nativos para `.wav` ou `.mp3` automaticamente após o download.
--   **Processo em Lote:** Otimizado para baixar um grande número de gravações de forma eficiente.
+-   **Múltiplos Métodos de Download:**
+    -   **Por Fila:** Filtre por intervalo de datas e fila específica.
+    -   **Por Lista de IDs:** Importe um arquivo (`.txt`, `.csv`) com IDs de conversas. Suporta o formato `Dia;ID` para organização automática.
+-   **Superação do Limite de 100 Itens:** O script divide automaticamente grandes solicitações em múltiplos lotes (chunks) para contornar o limite nativo da API do Genesys Cloud.
+-   **Organização Inteligente:**
+    -   **Pastas de Sessão:** Cada execução cria uma subpasta única com timestamp em `Recordings/` (ex: `2026-03-25_13-45-10`).
+    -   **Subpastas por Dia:** Opção automática para organizar arquivos em pastas `Dia_X` ou por data (`YYYY-MM-DD`) ao final do download.
+-   **Sistema de Logs Auditáveis:**
+    -   **Success Log:** Lista de arquivos baixados com sucesso.
+    -   **Retry Log (`failed_*.txt`):** Gera automaticamente uma lista limpa apenas com os IDs que falharam, pronta para ser re-importada e baixada novamente após correções.
+-   **Conversão de Áudio:** Converte `.ogg` nativo para `.wav` ou `.mp3` via FFmpeg.
 
-## Pré-requisitos
+## 📋 Pré-requisitos
 
-Antes de começar, garanta que você tenha os seguintes softwares instalados:
+1.  **[Node.js](https://nodejs.org/) (v18+).**
+2.  **[FFmpeg](https://ffmpeg.org/download.html)** instalado e no PATH do sistema.
+3.  **Credenciais OAuth (Client Credentials):** Criar em `Admin > Integrations > OAuth`.
+    -   **Permissões Necessárias:**
+        -   `analytics:conversationDetail:view`
+        -   `recording:recording:allpermissions`
+        -   `routing:queue:view`.
 
-1.  **[Node.js](https://nodejs.org/) (v18 ou superior):** Ambiente de execução para o script.
-2.  **[FFmpeg](https://ffmpeg.org/download.html):** Ferramenta essencial para a conversão de áudio. A maneira mais fácil de instalar no Windows é usando o gerenciador de pacotes [Chocolatey](https://chocolatey.org/):
-    ```powershell
-    choco install ffmpeg
-    ```
-3.  **Credenciais OAuth do Genesys Cloud:** Você precisará de um `Client ID` e `Client Secret` com as permissões necessárias. Crie em `Admin > Integrations > OAuth`. As permissões mínimas recomendadas são:
-    -   `recording:recording:view`
-    -   `recording:recordingSegment:view`
-    -   `analytics:conversationDetail:view`
-    -   `routing:queue:view`
-
-## Instalação
+## 🛠️ Instalação e Configuração
 
 1.  **Clone o repositório:**
     ```bash
-    git clone [https://github.com/yvssva/gard.git](https://github.com/yvssva/gard.git)
+    git clone https://github.com/yvssva/gard.git
     cd gard
     ```
+2.  **Instale as dependências:** `npm install`
+3.  **Configuração:** Renomeie `config.js.example` para `config.js` e insira suas credenciais.
 
-2.  **Instale as dependências do Node.js:**
-    ```bash
-    npm install
-    ```
+## 📖 Como Usar
 
-3.  **Configure suas credenciais:**
-    -   Renomeie o arquivo `config.js.example` para `config.js`.
-    -   Abra o arquivo `config.js` e insira seu `Client ID` e `Client Secret` obtidos do Genesys Cloud.
+Execute `npm start` e siga o menu interativo:
+1.  Selecione a **Região**.
+2.  Escolha o **Método de Download** (Fila ou Lista de IDs).
+3.  Se usar lista, informe o arquivo que deve estar no mesmo diretório do script (ex: `ids.csv`). O script aceita `ID` puro ou `Dia;ID`.
+4.  Escolha o **Formato Final** (WAV é recomendado para máxima qualidade).
+5.  Ao final, confirme se deseja **Organizar em Subpastas**.
 
-    ```javascript
-    // config.js
-    const clientId = 'SEU_CLIENT_ID_AQUI';
-    const clientSecret = 'SEU_CLIENT_SECRET_AQUI';
-    ```
+## 📊 Estrutura de Arquivos Gerada
 
-## Como Usar
-
-Execute o script a partir do seu terminal. É recomendado executá-lo em um terminal com privilégios de administrador para garantir que o FFmpeg funcione corretamente.
-
-```bash
-npm start
+```text
+gard/
+├── Recordings/
+│   └── YYYY-MM-DD_HH-mm-ss/  <-- Pasta da Sessão
+│       ├── Dia_1/            <-- Organização Automática
+│       │   └── ConvID_RecID.wav
+│       └── Dia_2/
+├── Logs/
+│   ├── success_*.txt
+│   ├── failed_*.txt          <-- Use este para retentativas!
+│   └── failed_details_*.csv
 ```
 
-O script irá guiá-lo interativamente através dos seguintes passos:
-1.  Seleção da região do Genesys Cloud.
-2.  Seleção do intervalo de datas.
-3.  Seleção da fila.
-4.  Seleção do formato de áudio final desejado (OGG, WAV ou MP3).
+## ⚖️ Licença
 
-Os arquivos serão baixados na pasta `Recordings`, e a conversão (se selecionada) ocorrerá automaticamente.
-
-## Como Funciona
-
-1.  O script se autentica na API do Genesys Cloud.
-2.  Busca as conversas que correspondem aos filtros de data e fila.
-3.  Para cada conversa, obtém os metadados das gravações disponíveis.
-4.  Cria um pedido em lote (batch request) para baixar todos os arquivos de áudio no formato nativo `.ogg`.
-5.  Após o download, se o formato selecionado for `WAV` ou `MP3`, ele chama um script PowerShell (`convert.ps1`) que utiliza o **FFmpeg** para converter cada arquivo `.ogg` para o formato desejado, removendo o original em seguida.
-
-## Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
+Este projeto está sob a licença MIT.

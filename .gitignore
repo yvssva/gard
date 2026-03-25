@@ -6,3 +6,5 @@ yarn-debug.log*
 yarn-error.log*
 Recordings/*
 !Recordings/.gitkeep
+Logs/
+*.csv
